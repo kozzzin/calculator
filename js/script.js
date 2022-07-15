@@ -1,10 +1,13 @@
+const Memory = {
 
+}
 
 const Calculator = {
 
-    a: '0',
-    b: '0',
-    result: 0,
+    a: '',
+    b: '',
+    result: '',
+    currentOperation: '',
 
     add(a,b) {
         a = this.checkInput(a);
@@ -41,12 +44,26 @@ const Calculator = {
         return a / 100;
     },
 
+    float(a,b) {
+        let val = b ? b : a;
+        val = this.checkInput(val);
+        Calculator.currentOperation = false;
+        return val + '.';
+    },
+
+    changeSign(a,b) {
+        let val = b ? b : a;
+        val = this.checkInput(val);
+        Calculator.currentOperation = false;
+        return val + '.';
+    },
+
     checkInput(input) {
-        if (typeof input !== 'number') {
-            return parseInt(input);
-        } else if (input === null) {
+        if (input == null) {
             return 0;
-        }
+        } else if (typeof input !== 'number') {
+            return Number(input);
+        } 
         return input;
     },
 
@@ -70,23 +87,22 @@ const Calculator = {
                 break;
             case '%':
                 result = this.percent(a);
+                break;  
+            case '.':
+                result = this.float(a,b);
                 break;
+            case '+/-':
+                    result = this.changeSign(a,b);
+                    break;
             default: console.log('empty choice');
         }
-        console.log(result);
+        return result;
     }
 }
 
 const interface = {
 
 }
-
-Calculator.operate(2,'+',2);
-Calculator.operate(2,'-',2);
-Calculator.operate(2,'*',2);
-Calculator.operate(2,'/',2);
-Calculator.operate(2,'**',3);
-Calculator.operate(20,'%');
 
 document.addEventListener('DOMContentLoaded', function(e) {
     const buttons = Array.from(document.querySelectorAll('.button'));
@@ -98,47 +114,88 @@ document.addEventListener('DOMContentLoaded', function(e) {
 function clickOnButton(e) {
     // console.log(e.target.getAttribute('data-value'));
     const value = e.target.getAttribute('data-value');
-    console.log('value: ', value);
+    // console.log('value: ', value);
     if (value === 'clear') {
-        console.log('ed');
-        Calculator.a = '0';
-        Calculator.b = '0';
-        Calculator.result = '0';
-        updateDisplay(Calculator.a);
-    } else if (!isNaN(parseInt(value))) {
-        Calculator.a += value;
-        updateDisplay(Calculator.a)
+        // clear display and values
+        clear();
+    } else if (!isNaN(Calculator.checkInput(value))) {
+        // update values if number
+        let displayValue = updateValues(value);
+        updateDisplay(displayValue);
     } else {
-        Calculator.operate(2,'+',2);
+        // operations
+        // equal
+        // - equal with two values
+        // - equal with one value does nothing
+        // clear values
+        // a value = result 
+        const unary = ['.','%','+/-',];
+        if (Calculator.a && Calculator.b) {
+            resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
+            Calculator.currentOperation = value;
+        } else {
+            if (unary.includes(value)) {
+                Calculator.currentOperation = value;
+                resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
+                Calculator.currentOperation = false;
+            } else if (value != '=') {
+                Calculator.currentOperation = value;
+                // resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
+            }
+        }
+        console.log(Calculator.currentOperation);
     }
     
 }
 
-function updateValues(val) {
-    // first
-    // second
-    
+function clear() {
+    clearValues();
+    updateDisplay(Calculator.result);
+}
+
+function saveLastResult() {
+    // if operater is clicked after result, result is a a value, so we need only second one
+}
+
+// if equal sign is double clicked it works like clear function
+
+// convertion to float
+
+function updateValues(val) {  
+    if (Calculator.currentOperation == false) {
+        // update first value
+        Calculator.a += Calculator.checkInput(val);
+        return Calculator.a;
+    } else {
+        // update second value
+        Calculator.b += Calculator.checkInput(val);
+        return Calculator.b;
+    }
+}
+
+function clearValues(saveResult=false) {
+    Calculator.a = '';
+    Calculator.b = '';
+    if (saveResult) {
+        Calculator.a = Calculator.result;
+    } else {
+        Calculator.currentOperation = false;
+    }
+    Calculator.result = 0;    
+}
+
+function resolve(operation, a, b) {
+    // need it to act, when equal sign or any of operators' buttons is clicked
+    Calculator.result = Calculator.operate(a,operation,b); 
+    updateDisplay(Calculator.result);
+    clearValues(true);
 }
 
 function updateDisplay(val) {
     const display = document.querySelector('#result');
     if (val == 'clear') {
         val = '0';
-        console.log('clear update')
-    } else if (display.innerText === '0') {
-
-    }
-    
+    } 
     display.textContent = val;
 }
 
-// update screen on operate function
-// equal sign works if we have two numbers and operator
-// work with answer to us next operation
-
-console.log(Calculator.checkInput('clear'));
-
-
-// if it's result
-// if operator fired
-// result + operator
