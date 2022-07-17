@@ -2,6 +2,8 @@ const Memory = {
 
 }
 
+// problems: after equal sign, if we take next number everything falls; 
+
 const Calculator = {
 
     a: '',
@@ -47,15 +49,21 @@ const Calculator = {
     float(a,b) {
         let val = b ? b : a;
         val = this.checkInput(val);
-        Calculator.currentOperation = false;
-        return val + '.';
+        // Calculator.currentOperation = false;
+        const onScreen = document.querySelector('#result').textContent;
+        console.log(onScreen.search(/[\.]/));
+        // console.log(onScreen, typeof onScreen);
+        if (onScreen.search(/[\.]/) == -1) {
+            return val + '.';
+        }
+        return val;
     },
 
     changeSign(a,b) {
         let val = b ? b : a;
         val = this.checkInput(val);
-        Calculator.currentOperation = false;
-        return val + '.';
+        // Calculator.currentOperation = false;
+        return -1 * val;
     },
 
     checkInput(input) {
@@ -123,21 +131,14 @@ function clickOnButton(e) {
         let displayValue = updateValues(value);
         updateDisplay(displayValue);
     } else {
-        // operations
-        // equal
-        // - equal with two values
-        // - equal with one value does nothing
-        // clear values
-        // a value = result 
         const unary = ['.','%','+/-',];
-        if (Calculator.a && Calculator.b) {
+        if ((Calculator.a && Calculator.b) && !unary.includes(value)) {
             resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
-            Calculator.currentOperation = value;
+            Calculator.currentOperation = value === '=' ? false : value;
         } else {
             if (unary.includes(value)) {
-                Calculator.currentOperation = value;
-                resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
-                Calculator.currentOperation = false;
+                // Calculator.currentOperation = value;
+                resolve(value, Calculator.a, Calculator.b);
             } else if (value != '=') {
                 Calculator.currentOperation = value;
                 // resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
@@ -146,6 +147,13 @@ function clickOnButton(e) {
         console.log(Calculator.currentOperation);
     }
     
+}
+
+function resolve(operation, a, b) {
+    // need it to act, when equal sign or any of operators' buttons is clicked
+    Calculator.result = Calculator.operate(a,operation,b); 
+    updateDisplay(Calculator.result);
+    clearValues(true);
 }
 
 function clear() {
@@ -177,19 +185,14 @@ function clearValues(saveResult=false) {
     Calculator.a = '';
     Calculator.b = '';
     if (saveResult) {
-        Calculator.a = Calculator.result;
+        Calculator.a = String(Calculator.result);
     } else {
         Calculator.currentOperation = false;
     }
     Calculator.result = 0;    
 }
 
-function resolve(operation, a, b) {
-    // need it to act, when equal sign or any of operators' buttons is clicked
-    Calculator.result = Calculator.operate(a,operation,b); 
-    updateDisplay(Calculator.result);
-    clearValues(true);
-}
+
 
 function updateDisplay(val) {
     const display = document.querySelector('#result');
