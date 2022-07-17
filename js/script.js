@@ -1,14 +1,4 @@
-const Memory = {
-
-}
-
-const Calculator = {
-
-    a: '',
-    b: '',
-    result: '',
-    currentOperation: '',
-
+const Operations = {
     add(a,b) {
         a = this.checkInput(a);
         b = this.checkInput(b);
@@ -39,163 +29,230 @@ const Calculator = {
         return a ** b;
     },
 
-    percent(a) {
-        a = this.checkInput(a);
-        return a / 100;
+    percent(val) {
+        val = this.checkInput(val);
+        return val / 100;
     },
 
-    float(a,b) {
-        let val = b ? b : a;
+    float(val) {
         val = this.checkInput(val);
-        Calculator.currentOperation = false;
-        return val + '.';
+        if (Memory.current.search(/\./) == -1) {
+            return val + '.';
+        }
+        return val;
     },
 
-    changeSign(a,b) {
-        let val = b ? b : a;
+    changeSign(val) {
         val = this.checkInput(val);
-        Calculator.currentOperation = false;
-        return val + '.';
+        return -1 * val;
     },
 
     checkInput(input) {
-        if (input == null) {
-            return 0;
-        } else if (typeof input !== 'number') {
-            return Number(input);
-        } 
-        return input;
+        return Number(input);
+    }
+}
+
+const Memory = {
+    current: '',
+    saved: '',
+    currentOperation: false,
+
+    clearValues() {
+        Memory.current = '';
+        Memory.saved = '';
+        Memory.currentOperation = '';
+    },
+
+    save(val) {
+        this.saved = String(this.current);
+        this.current = '';
+    }
+}
+
+const Interface = {
+    updateDisplay(val='0') {
+            const display = document.querySelector('#result');
+            display.textContent = val;           
+    },
+
+    clear() {
+        Memory.clearValues();
+        this.updateDisplay();
+        this.toggleActiveOperation();
+    },
+
+    resolve(value) {
+        switch(value) {
+            case 'clear':
+                Interface.clear();
+                break;
+            case '.':
+            case '%':
+            case '+/-':
+                Interface.operate(Memory.current,value);   
+                break;
+            case '=':
+                if (Memory.current && Memory.saved) {
+                    Interface.operate(Memory.saved,Memory.currentOperation,Memory.current);
+                } else {
+                    Memory.save();
+                }
+                break;
+            default:
+                Memory.currentOperation = value;
+                if (Memory.current && Memory.saved) {
+                    Interface.operate(Memory.saved,Memory.currentOperation,Memory.current);
+                } else {
+                    Memory.save();
+                }
+                
+                Interface.toggleActiveOperation(value);
+                console.log('binary operation in resolve ');
+                
+                // Operations.binary();
+        }
+    },
+
+    toggleActiveOperation(value) {
+        let activeOperation = document.querySelector(`[data-value="${value}"]`);
+        document.querySelectorAll('.active').forEach(e => e.classList.remove('active'));
+        if (value) {
+            activeOperation.classList.add('active');
+        }
+
+    },
+
+    clickOnButton(e) {
+        const value = e.target.getAttribute('data-value');
+        
+        if (!isNaN(Number(value))) {
+            Memory.current += String(Number(value));
+            Interface.updateDisplay(Memory.current);
+        } else {
+            console.log('operation' + value);
+            Interface.resolve(value);
+        }
+
+        // if number => update current
+
+        // if number after operation => save current to memory, work with current
+
+        // if equal sign
+
+        // if unary operator => work with current
+
+        // if memory + current + operation key => update current, clear all
+
     },
 
     operate(a,operator,b) {
         let result;
         switch(operator) {
             case '+':
-                result = this.add(a,b);
+                result = Operations.add(a,b);
                 break;
             case '-':
-                result = this.substract(a,b);
+                result = Operations.substract(a,b);
                 break;
             case '*':
-                result = this.multiply(a,b);
+                result = Operations.multiply(a,b);
                 break;
             case '/':
-                result = this.divide(a,b);
+                result = Operations.divide(a,b);
                 break;
             case '**':
-                result = this.power(a,b);
+                result = Operations.power(a,b);
                 break;
             case '%':
-                result = this.percent(a);
+                result = Operations.percent(a);
                 break;  
             case '.':
-                result = this.float(a,b);
+                result = Operations.float(a);
                 break;
             case '+/-':
-                    result = this.changeSign(a,b);
-                    break;
+                result = Operations.changeSign(a);
+                break;
             default: console.log('empty choice');
         }
-        return result;
+        // return result;
+        // update saved
+        Memory.current = result;
+        Interface.updateDisplay(result);
     }
-}
-
-const interface = {
-
 }
 
 document.addEventListener('DOMContentLoaded', function(e) {
     const buttons = Array.from(document.querySelectorAll('.button'));
     buttons.forEach((button) => {
-        button.addEventListener('click', clickOnButton);
+        button.addEventListener('click', Interface.clickOnButton);
     });
 });
 
-function clickOnButton(e) {
-    // console.log(e.target.getAttribute('data-value'));
-    const value = e.target.getAttribute('data-value');
-    // console.log('value: ', value);
-    if (value === 'clear') {
-        // clear display and values
-        clear();
-    } else if (!isNaN(Calculator.checkInput(value))) {
-        // update values if number
-        let displayValue = updateValues(value);
-        updateDisplay(displayValue);
-    } else {
-        // operations
-        // equal
-        // - equal with two values
-        // - equal with one value does nothing
-        // clear values
-        // a value = result 
-        const unary = ['.','%','+/-',];
-        if (Calculator.a && Calculator.b) {
-            resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
-            Calculator.currentOperation = value;
-        } else {
-            if (unary.includes(value)) {
-                Calculator.currentOperation = value;
-                resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
-                Calculator.currentOperation = false;
-            } else if (value != '=') {
-                Calculator.currentOperation = value;
-                // resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
-            }
-        }
-        console.log(Calculator.currentOperation);
-    }
+
+// function clickOnButton(e) {
+//     } else if (!isNaN(Calculator.checkInput(value))) {
+//         // update values if number
+//         let displayValue = updateValues(value);
+//         updateDisplay(displayValue);
+//     } else {
+//         // operations
+//         // equal
+//         // - equal with two values
+//         // - equal with one value does nothing
+//         // clear values
+//         // a value = result 
+//         const unary = ['.','%','+/-',];
+//         if (Calculator.a && Calculator.b) {
+//             resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
+//             Calculator.currentOperation = value;
+//         } else {
+//             if (unary.includes(value)) {
+//                 Calculator.currentOperation = value;
+//                 resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
+//                 Calculator.currentOperation = false;
+//             } else if (value != '=') {
+//                 Calculator.currentOperation = value;
+//                 // resolve(Calculator.currentOperation, Calculator.a, Calculator.b);
+//             }
+//         }
+//         console.log(Calculator.currentOperation);
+//     }
     
-}
+// }
 
-function clear() {
-    clearValues();
-    updateDisplay(Calculator.result);
-}
 
-function saveLastResult() {
-    // if operater is clicked after result, result is a a value, so we need only second one
-}
 
-// if equal sign is double clicked it works like clear function
+// // if equal sign is double clicked it works like clear function
 
-// convertion to float
+// // convertion to float
 
-function updateValues(val) {  
-    if (Calculator.currentOperation == false) {
-        // update first value
-        Calculator.a += Calculator.checkInput(val);
-        return Calculator.a;
-    } else {
-        // update second value
-        Calculator.b += Calculator.checkInput(val);
-        return Calculator.b;
-    }
-}
+// function updateValues(val) {  
+//     if (Calculator.currentOperation == false) {
+//         // update first value
+//         Calculator.a += Calculator.checkInput(val);
+//         return Calculator.a;
+//     } else {
+//         // update second value
+//         Calculator.b += Calculator.checkInput(val);
+//         return Calculator.b;
+//     }
+// }
 
-function clearValues(saveResult=false) {
-    Calculator.a = '';
-    Calculator.b = '';
-    if (saveResult) {
-        Calculator.a = Calculator.result;
-    } else {
-        Calculator.currentOperation = false;
-    }
-    Calculator.result = 0;    
-}
+// function clearValues(saveResult=false) {
+//     Calculator.a = '';
+//     Calculator.b = '';
+//     if (saveResult) {
+//         Calculator.a = Calculator.result;
+//     } else {
+//         Calculator.currentOperation = false;
+//     }
+//     Calculator.result = 0;    
+// }
 
-function resolve(operation, a, b) {
-    // need it to act, when equal sign or any of operators' buttons is clicked
-    Calculator.result = Calculator.operate(a,operation,b); 
-    updateDisplay(Calculator.result);
-    clearValues(true);
-}
-
-function updateDisplay(val) {
-    const display = document.querySelector('#result');
-    if (val == 'clear') {
-        val = '0';
-    } 
-    display.textContent = val;
-}
+// function resolve(operation, a, b) {
+//     // need it to act, when equal sign or any of operators' buttons is clicked
+//     Calculator.result = Calculator.operate(a,operation,b); 
+//     updateDisplay(Calculator.result);
+//     clearValues(true);
+// }
 
