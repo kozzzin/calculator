@@ -52,6 +52,7 @@ const Operations = {
     }
 }
 
+
 const Memory = {
     current: '',
     saved: '',
@@ -62,6 +63,7 @@ const Memory = {
         Memory.current = '';
         Memory.saved = '';
         Memory.currentOperation = false;
+        Memory.result;
     },
 
     save(val) {
@@ -69,6 +71,7 @@ const Memory = {
         this.current = '';
     }
 }
+
 
 const Interface = {
     updateDisplay(val='0') {
@@ -94,7 +97,6 @@ const Interface = {
                 break;
             case '=':
             default:
-                
                 if (Memory.current && Memory.saved) {
                     Interface.operate(Memory.saved,Memory.currentOperation,Memory.current);
                     Memory.saved = '';
@@ -108,8 +110,7 @@ const Interface = {
                 if (value != '=') {
                     Memory.currentOperation = value;                   
                 }
-                Interface.toggleActiveOperation(value);        
-                // Operations.binary();
+                Interface.toggleActiveOperation(value);    
         }
     },
 
@@ -126,7 +127,6 @@ const Interface = {
         const value = e.target.getAttribute('data-value');
         
         if (!isNaN(Number(value))) {
-            // update value
             if (Memory.result) {
                 if (Memory.currentOperation != false) {
                     Memory.save();
@@ -138,6 +138,9 @@ const Interface = {
             Memory.current += String(Number(value));
             Interface.updateDisplay(Memory.current);
         } else {
+            if (Memory.result) {
+                Memory.result = false;
+            }
             Interface.resolve(value);
         }
     },
@@ -169,12 +172,13 @@ const Interface = {
             case '+/-':
                 result = Operations.changeSign(a);
                 break;
-            default: console.log('no operartor provideds');
+            default: console.log('no operartor provided');
         }
         Memory.current = result;
         Interface.updateDisplay(result);
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', function(e) {
     const buttons = Array.from(document.querySelectorAll('.button'));
