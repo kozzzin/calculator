@@ -1,0 +1,122 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Helvetica', sans-serif;
+    height: 100%;
+    background: rgb(248, 249, 168);
+}
+
+
+
+#calculator {
+    background: #000;
+    color: #fff;
+    width: 400px;
+    height: 650px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 25px;
+    box-shadow: -5px 5px 0 3px rgba(0,0,0,0.5);
+    box-shadow: -3px 3px 0 3px rgba(0,0,0,0.5);
+}
+
+#calculator div {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    border-radius: 100%;
+    background: rgb(117, 117, 117);
+    aspect-ratio: 1/1;
+    font-size: 2em;
+}
+
+#calculator #display {
+    display: grid;
+    grid-row: 1/3;
+    grid-column: 1/5;
+    background-color: #0c0c0c;
+    border-radius: 0;
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-columns: 1fr;
+    aspect-ratio: 0;
+    text-align: right;
+}
+
+#calculator #display .display-row {
+    font-size: 0.8em;
+}
+
+#calculator #display #result {
+    display: grid;
+    grid-row: 1/4;
+    font-size: 1.2em;
+}
+
+#calculator #zero-width {
+    grid-column: 1/3;
+    justify-content: space-between;
+    height: 75px;
+    background: transparent;
+    width: 100%;
+}
+
+#zero-width div {
+    background: rgb(117, 117, 117);
+    border-radius: 0;
+}
+
+#zero-width::after,
+#zero-width::before {
+    content: '';
+    background: rgb(117, 117, 117);
+    width: 37.5px;
+    height: 75px;
+}
+
+#zero-width::after {
+    border-top-right-radius: 37.5px;
+    border-bottom-right-radius: 37.5px;
+    flex: 1;
+}
+
+#zero-width::before {
+    border-top-left-radius: 37.5px;
+    border-bottom-left-radius: 37.5px;
+    flex: 1;
+}
+
+#zero-width span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: rgb(117, 117, 117);
+    flex: 1;
+}
+
+#calculator .orange {
+    background-color: #ff9900;
+}
+
+#calculator .grey {
+    background: #ccc;
+    color: #000;
+}
+
+#calculator .button {
+    cursor: pointer;
+}
+
+#calculator div.button:hover,
+#calculator div.button.active {
+    filter: brightness(1.3);
+}
